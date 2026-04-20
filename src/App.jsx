@@ -15,13 +15,6 @@ function App() {
             <a href="#why">Why me</a>
             <a href="#skills">Skills</a>
             <a href="#projects">Projects</a>
-            <a
-              href="/cv/Joan-Cako-CV.html"
-              target="_blank"
-              rel="noreferrer"
-            >
-              CV
-            </a>
             <a href="#contact">Contact</a>
           </nav>
           <a href="#contact" className="btn-consult">Let's talk</a>
@@ -44,14 +37,6 @@ function App() {
               <div className="hero-actions">
                 <a href="#projects" className="btn-main">See Projects</a>
                 <a href="#contact" className="btn-alt">Contact Me</a>
-                <a
-                  href="/cv/Joan-Cako-CV.html"
-                  className="btn-alt"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View CV
-                </a>
               </div>
               <div className="hero-meta">
                 <span>Junior web developer</span>
@@ -310,9 +295,6 @@ function App() {
               <p className="section-subtitle">
                 For collaboration or job opportunities, send me a quick message and I’ll
                 get back to you soon.
-              </p>
-              <p className="section-subtitle">
-                Email: cakojoan@gmail.com · Phone: +355692572954
               </p>
             </div>
             <div className="contact-actions">
