@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AuthKit - Login/Signup UI</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f2ee;
+        --card: #ffffff;
+        --ink: #1f2430;
+        --muted: #5f6b7a;
+        --line: #e4dbd2;
+        --accent: #f26a4a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(135deg, #f7f2ee 0%, #fff8f3 50%, #edf6f5 100%);
+        color: var(--ink);
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 32px 16px;
+      }
+
+      .shell {
+        width: min(920px, 100%);
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 28px;
+      }
+
+      .panel {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 20px 40px rgba(31, 33, 42, 0.1);
+      }
+
+      .panel h1 {
+        margin: 0 0 10px;
+        font-size: 2rem;
+      }
+
+      .panel p {
+        margin: 0 0 18px;
+        color: var(--muted);
+      }
+
+      .bullets {
+        display: grid;
+        gap: 10px;
+      }
+
+      .bullets span {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        color: var(--muted);
+      }
+
+      .bullets span::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+
+      .auth-card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 24px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .tab {
+        flex: 1;
+        border: 1px solid var(--line);
+        background: #fff;
+        padding: 10px 12px;
+        border-radius: 999px;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--muted);
+      }
+
+      .tab.active {
+        border-color: var(--accent);
+        color: var(--ink);
+      }
+
+      label {
+        display: block;
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        font-size: 1rem;
+      }
+
+      .field {
+        margin-bottom: 14px;
+      }
+
+      .error {
+        color: #a02716;
+        font-size: 0.85rem;
+        margin-top: 6px;
+      }
+
+      .submit {
+        width: 100%;
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .helper {
+        margin-top: 12px;
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 820px) {
+        .shell {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <section class="panel">
+        <h1>AuthKit UI</h1>
+        <p>Clean login and signup flow with validation and focus states.</p>
+        <div class="bullets">
+          <span>Input validation and error messages</span>
+          <span>Keyboard-friendly layout</span>
+          <span>Reusable form structure</span>
+        </div>
+      </section>
+
+      <section class="auth-card">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-mode="login" type="button">Login</button>
+          <button class="tab" data-mode="signup" type="button">Sign up</button>
+        </div>
+
+        <form id="authForm" novalidate>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="name@email.com" required />
+            <div class="error" id="emailError"></div>
+          </div>
+          <div class="field" id="nameField" hidden>
+            <label for="name">Full name</label>
+            <input id="name" type="text" placeholder="Joan Cako" />
+            <div class="error" id="nameError"></div>
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" placeholder="••••••••" required />
+            <div class="error" id="passError"></div>
+          </div>
+          <button class="submit" type="submit">Continue</button>
+          <div class="helper" id="helperText">No backend, UI demo only.</div>
+        </form>
+      </section>
+    </div>
+
+    <script>
+      const tabs = document.querySelectorAll(".tab");
+      const form = document.getElementById("authForm");
+      const nameField = document.getElementById("nameField");
+      const email = document.getElementById("email");
+      const nameInput = document.getElementById("name");
+      const password = document.getElementById("password");
+      const emailError = document.getElementById("emailError");
+      const nameError = document.getElementById("nameError");
+      const passError = document.getElementById("passError");
+      const helperText = document.getElementById("helperText");
+      let mode = "login";
+
+      const setMode = (next) => {
+        mode = next;
+        tabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.mode === mode));
+        nameField.hidden = mode === "login";
+        helperText.textContent = mode === "login" ? "No backend, UI demo only." : "Create account UI (demo).";
+        clearErrors();
+      };
+
+      const clearErrors = () => {
+        emailError.textContent = "";
+        nameError.textContent = "";
+        passError.textContent = "";
+      };
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => setMode(tab.dataset.mode));
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        clearErrors();
+
+        let valid = true;
+        if (!email.value.includes("@")) {
+          emailError.textContent = "Enter a valid email.";
+          valid = false;
+        }
+        if (mode === "signup" && nameInput.value.trim().length < 3) {
+          nameError.textContent = "Name must be at least 3 characters.";
+          valid = false;
+        }
+        if (password.value.length < 6) {
+          passError.textContent = "Password must be 6+ characters.";
+          valid = false;
+        }
+
+        if (valid) {
+          helperText.textContent = mode === "login" ? "Login success (demo)." : "Account created (demo).";
+          form.reset();
+          if (mode === "signup") {
+            nameField.hidden = false;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

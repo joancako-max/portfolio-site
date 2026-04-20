@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow - Todo App</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f4ef;
+        --card: #ffffff;
+        --ink: #1f2430;
+        --muted: #586174;
+        --line: #e6ded5;
+        --accent: #0ea5a4;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 32px 16px;
+      }
+
+      .app {
+        width: min(720px, 100%);
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        padding: 28px;
+        box-shadow: 0 18px 35px rgba(31, 33, 42, 0.1);
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+        margin: 0;
+      }
+
+      header span {
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .controls {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .controls input {
+        flex: 1;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        font-size: 1rem;
+      }
+
+      .controls button {
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+
+      .filters button {
+        border: 1px solid var(--line);
+        background: #fff;
+        padding: 6px 12px;
+        border-radius: 999px;
+        cursor: pointer;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .filters button.active {
+        border-color: var(--accent);
+        color: var(--ink);
+      }
+
+      .list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 12px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: #fff;
+      }
+
+      .list li.completed span {
+        text-decoration: line-through;
+        color: var(--muted);
+      }
+
+      .list button {
+        margin-left: auto;
+        border: none;
+        background: #fbe9e7;
+        color: #9a2d1d;
+        padding: 6px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      .empty {
+        color: var(--muted);
+        text-align: center;
+        padding: 16px 0 8px;
+      }
+
+      footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+
+      @media (max-width: 540px) {
+        .controls {
+          flex-direction: column;
+        }
+
+        footer {
+          flex-direction: column;
+          gap: 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div>
+          <h1>TaskFlow</h1>
+          <span>Simple todo app with local storage.</span>
+        </div>
+        <strong id="count">0 tasks</strong>
+      </header>
+
+      <div class="controls">
+        <input id="taskInput" type="text" placeholder="Add a new task" />
+        <button id="addBtn" type="button">Add task</button>
+      </div>
+
+      <div class="filters" role="tablist">
+        <button type="button" class="active" data-filter="all">All</button>
+        <button type="button" data-filter="active">Active</button>
+        <button type="button" data-filter="done">Done</button>
+      </div>
+
+      <ul id="taskList" class="list"></ul>
+      <div id="emptyState" class="empty" hidden>No tasks yet. Add your first.</div>
+
+      <footer>
+        <span>Built with HTML, CSS, and JS.</span>
+        <span>Data is saved in your browser.</span>
+      </footer>
+    </div>
+
+    <script>
+      const input = document.getElementById("taskInput");
+      const addBtn = document.getElementById("addBtn");
+      const list = document.getElementById("taskList");
+      const emptyState = document.getElementById("emptyState");
+      const count = document.getElementById("count");
+      const filterButtons = document.querySelectorAll("[data-filter]");
+      const STORAGE_KEY = "taskflow_tasks";
+
+      let tasks = [];
+      let filter = "all";
+
+      const load = () => {
+        try {
+          const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          tasks = Array.isArray(stored) ? stored : [];
+        } catch {
+          tasks = [];
+        }
+      };
+
+      const save = () => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      };
+
+      const setCount = () => {
+        count.textContent = `${tasks.length} tasks`;
+      };
+
+      const matchesFilter = (task) => {
+        if (filter === "active") return !task.done;
+        if (filter === "done") return task.done;
+        return true;
+      };
+
+      const render = () => {
+        list.innerHTML = "";
+        const visible = tasks.filter(matchesFilter);
+        emptyState.hidden = visible.length !== 0;
+        visible.forEach((task) => {
+          const item = document.createElement("li");
+          item.className = task.done ? "completed" : "";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = task.done;
+          checkbox.addEventListener("change", () => toggleTask(task.id));
+
+          const text = document.createElement("span");
+          text.textContent = task.text;
+
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.textContent = "Delete";
+          remove.addEventListener("click", () => deleteTask(task.id));
+
+          item.append(checkbox, text, remove);
+          list.append(item);
+        });
+        setCount();
+      };
+
+      const addTask = () => {
+        const value = input.value.trim();
+        if (!value) return;
+        tasks.unshift({ id: crypto.randomUUID(), text: value, done: false });
+        input.value = "";
+        save();
+        render();
+      };
+
+      const toggleTask = (id) => {
+        tasks = tasks.map((task) =>
+          task.id === id ? { ...task, done: !task.done } : task
+        );
+        save();
+        render();
+      };
+
+      const deleteTask = (id) => {
+        tasks = tasks.filter((task) => task.id !== id);
+        save();
+        render();
+      };
+
+      addBtn.addEventListener("click", addTask);
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          addTask();
+        }
+      });
+
+      filterButtons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          filterButtons.forEach((item) => item.classList.remove("active"));
+          btn.classList.add("active");
+          filter = btn.dataset.filter;
+          render();
+        });
+      });
+
+      load();
+      render();
+    </script>
+  </body>
+</html>
